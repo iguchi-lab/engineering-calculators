@@ -34,7 +34,14 @@ button:disabled { opacity:.55; cursor:wait; }
 .chart-heading .lead { margin-bottom:0; }
 .chart-heading button { flex:0 0 auto; }
 .chart-scroll { width:100%; overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:#fff; }
-.psychrometric-chart { display:block; width:100%; min-width:700px; height:auto; }
+.psychrometric-chart,.mollier-chart { display:block; width:100%; min-width:700px; height:auto; }
+.mollier-controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:0 18px; }
+.mollier-actions { display:flex; align-items:end; padding-bottom:22px; }
+.table-scroll { width:100%; overflow-x:auto; }
+.state-table { width:100%; border-collapse:collapse; white-space:nowrap; }
+.state-table th,.state-table td { padding:10px 12px; border-bottom:1px solid var(--line); text-align:right; font-variant-numeric:tabular-nums; }
+.state-table th:first-child,.state-table td:first-child,.state-table th:nth-child(2),.state-table td:nth-child(2) { text-align:left; }
+.state-table thead { background:#edf6f6; }
 .chart-source { margin:8px 0 0; color:var(--muted); font-size:.9rem; }
 footer { border-top:1px solid var(--line); padding:24px 0; color:var(--muted); }
 @media (max-width:620px) { main { padding-top:24px; } .card { padding:18px; } .chart-heading { display:block; } .chart-heading button { margin-top:12px; } }
