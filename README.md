@@ -1,6 +1,8 @@
-# Environment Calculator Platform
+# Engineering Calculator Platform
 
 PMV/PPD and moist-air calculators deployed as a secure AWS serverless web application.
+
+This repository is intended to grow into a collection of engineering calculation tools with a shared web interface and AWS platform.
 
 ## Architecture
 
@@ -10,7 +12,7 @@ PMV/PPD and moist-air calculators deployed as a secure AWS serverless web applic
 - Separate Python Lambda functions calculate PMV/PPD and moist-air properties.
 - API requests are throttled and validated server-side.
 
-The legacy calculators are not modified by this stack, so the new application can be tested in parallel before cutover.
+The stack deploys independently, so existing calculators can remain available during acceptance testing and migration.
 
 ## Source layout
 
@@ -39,7 +41,7 @@ Prerequisites:
 
 ```powershell
 ./scripts/deploy-production.ps1 `
-  -StackName iguchi-lab-calculators `
+  -StackName engineering-calculators `
   -Region ap-northeast-1 `
   -ArtifactBucket your-private-artifact-bucket
 ```
@@ -47,4 +49,3 @@ Prerequisites:
 The script validates and packages the template, deploys the stack, uploads `web-release/`, invalidates CloudFront, and prints the HTTPS URL.
 
 Deploy to a parallel stack first and complete acceptance testing before removing legacy resources.
-
