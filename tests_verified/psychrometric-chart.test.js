@@ -71,6 +71,12 @@ test("chart renders SVG paths and the calculated state marker", () => {
   assert.ok(svg.children.length > 5);
   assert.ok(svg.children.some((child) => child.name === "g"));
   assert.equal(findNodes(svg, (node) => node.attributes["data-role"] === "enthalpy-axis").length, 1);
-  assert.equal(findNodes(svg, (node) => node.attributes["data-role"] === "enthalpy-title")[0].textContent, "比エンタルピー h [kJ/kg(DA)]");
-  assert.ok(findNodes(svg, (node) => node.attributes["data-role"] === "enthalpy-tick").length >= 10);
+  const enthalpyTitle = findNodes(svg, (node) => node.attributes["data-role"] === "enthalpy-title")[0];
+  assert.equal(enthalpyTitle.textContent, "比エンタルピー h [kJ/kg(DA)]");
+  assert.equal(enthalpyTitle.attributes["data-axis-offset"], "24");
+  const enthalpyLines = findNodes(svg, (node) => node.attributes["data-role"] === "enthalpy-line");
+  assert.equal(enthalpyLines.length, 13);
+  assert.ok(enthalpyLines.every((node) => node.attributes["data-axis-hit"] === "true"));
+  assert.ok(enthalpyLines.every((node) => node.attributes.d.startsWith("M")));
+  assert.equal(findNodes(svg, (node) => node.attributes["data-role"] === "enthalpy-tick").length, 13);
 });
