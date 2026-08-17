@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>p-h線図（モリエル線図）</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header><div class="container"><a href="/index.html">← 計算ツール一覧</a></div></header>
+  <main class="container">
+    <h1>p-h線図（モリエル線図）</h1>
+    <p class="lead">冷媒と運転条件を指定し、理想的な蒸気圧縮冷凍サイクルを表示します。</p>
+
+    <form id="mollier-form" class="card mollier-controls">
+      <div class="field">
+        <label for="fluid">冷媒</label>
+        <select id="fluid" name="fluid">
+          <option value="R32">R32</option>
+          <option value="R410A">R410A</option>
+          <option value="R134a">R134a</option>
+          <option value="R1234yf">R1234yf</option>
+          <option value="R290">R290（プロパン）</option>
+        </select>
+      </div>
+      <div class="field"><label for="evaporating-temperature">蒸発温度（℃）</label><input id="evaporating-temperature" name="evaporatingTemperature" type="number" step="0.1" value="6.85"></div>
+      <div class="field"><label for="condensing-temperature">凝縮温度（℃）</label><input id="condensing-temperature" name="condensingTemperature" type="number" step="0.1" value="51.85"></div>
+      <div class="field"><label for="superheat">過熱度（K）</label><input id="superheat" name="superheat" type="number" min="0" max="50" step="0.1" value="5"></div>
+      <div class="field"><label for="subcooling">過冷却度（K）</label><input id="subcooling" name="subcooling" type="number" min="0" max="50" step="0.1" value="5"></div>
+      <div class="field"><label for="pressure-min">最低圧力（MPa）</label><input id="pressure-min" name="pressureMin" type="number" min="0.05" max="10" step="0.05" value="0.3"></div>
+      <div class="field"><label for="pressure-max">最高圧力（MPa）</label><input id="pressure-max" name="pressureMax" type="number" min="0.1" max="20" step="0.1" value="5"></div>
+      <div class="mollier-actions"><button id="calculate" type="submit">線図を作成</button></div>
+    </form>
+
+    <section class="card chart-card">
+      <div class="chart-heading">
+        <div><h2>冷媒p-h線図</h2><p id="status" class="status" aria-live="polite">CoolPropを読み込んでいます…</p></div>
+        <button id="download-chart" type="button" disabled>SVGを保存</button>
+      </div>
+      <div class="chart-scroll"><svg id="mollier-chart" class="mollier-chart" role="img" aria-labelledby="mollier-title mollier-description"></svg></div>
+    </section>
+
+    <section class="card chart-card">
+      <h2>冷凍サイクル状態点</h2>
+      <div class="table-scroll">
+        <table class="state-table">
+          <thead><tr><th>状態</th><th>名称</th><th>温度（℃）</th><th>圧力（MPa）</th><th>比エンタルピー（kJ/kg）</th><th>比エントロピー（kJ/(kg·K)）</th></tr></thead>
+          <tbody id="state-table"><tr><td colspan="6">計算後に表示します。</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="chart-source">
+      計算エンジン: <a href="https://coolprop.org/" target="_blank" rel="noopener noreferrer">CoolProp 8.0.0</a>（MIT License）。
+      描画ロジック: <a href="https://github.com/iguchi-lab/mollier-diagram" target="_blank" rel="noopener noreferrer">iguchi-lab/mollier-diagram</a>。
+    </p>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
