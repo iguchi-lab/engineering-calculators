@@ -1,6 +1,6 @@
 # Engineering Calculator Platform
 
-PMV/PPD and moist-air calculators deployed as a secure AWS serverless web application.
+PMV/PPD, moist-air, and refrigerant Mollier-diagram tools deployed as a secure AWS serverless web application.
 
 This repository is intended to grow into a collection of engineering calculation tools with a shared web interface and AWS platform.
 
@@ -12,6 +12,7 @@ This repository is intended to grow into a collection of engineering calculation
 - Separate Python Lambda functions calculate PMV/PPD and moist-air properties.
 - API requests are throttled and validated server-side.
 - The moist-air page renders an h-x psychrometric chart as browser-native SVG.
+- The Mollier page runs the official CoolProp 8.0.0 WebAssembly build locally in the browser and renders a refrigerant p-h diagram.
 
 The stack deploys independently, so existing calculators can remain available during acceptance testing and migration.
 
@@ -35,6 +36,10 @@ The PMV tests include representative values captured from the legacy API. The mo
 
 The browser chart ports the equations and oblique-coordinate transform from
 [`iguchi-lab/psychrometric-chart`](https://github.com/iguchi-lab/psychrometric-chart).
+
+The Mollier tool adapts [`iguchi-lab/mollier-diagram`](https://github.com/iguchi-lab/mollier-diagram)
+and vendors the official MIT-licensed CoolProp 8.0.0 JavaScript/WASM binaries. The pinned
+vendor files and license are stored under `web-release/mollier/vendor/coolprop-8.0.0/`.
 
 ## Deployment
 
