@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PMV・PPD計算</title><link rel="stylesheet" href="/assets/style.css"></head>
+<body>
+  <header><div class="container"><a href="/index.html">← 計算ツール一覧</a></div></header>
+  <main class="container">
+    <h1>PMV・PPD計算</h1><p class="lead">スライダーを変更すると自動的に再計算します。</p>
+    <div class="grid">
+      <form id="pmv-form" class="card">
+        <div class="field"><label for="ta">空気温度 <span><output data-value-for="ta"></output> ℃</span></label><input id="ta" name="ta" type="range" min="10" max="40" step="0.1" value="20"></div>
+        <div class="field"><label for="rh">相対湿度 <span><output data-value-for="rh"></output> %</span></label><input id="rh" name="rh" type="range" min="0" max="100" step="1" value="50"></div>
+        <div class="field"><label for="mrt">平均放射温度 <span><output data-value-for="mrt"></output> ℃</span></label><input id="mrt" name="mrt" type="range" min="10" max="50" step="0.1" value="20"></div>
+        <div class="field"><label for="v">気流速度 <span><output data-value-for="v"></output> m/s</span></label><input id="v" name="v" type="range" min="0" max="3" step="0.05" value="0.2"></div>
+        <div class="field"><label for="clo">着衣量 <span><output data-value-for="clo"></output> clo</span></label><input id="clo" name="clo" type="range" min="0" max="2" step="0.1" value="1"></div>
+        <div class="field"><label for="met">代謝量 <span><output data-value-for="met"></output> met</span></label><input id="met" name="met" type="range" min="0.8" max="4" step="0.1" value="1"></div>
+        <button id="calculate" type="submit">計算する</button>
+      </form>
+      <section class="card result" aria-live="polite"><h2>計算結果</h2><p id="status" class="status">計算しています…</p><div id="result" hidden><p id="sensation"></p><p class="result-value">PMV <span id="pmv-result">—</span></p><p>PPD <strong id="ppd-result">—</strong> %</p></div></section>
+    </div>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
+

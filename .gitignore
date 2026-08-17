@@ -1,0 +1,16 @@
+# Superseded development drafts retained locally
+README.draft.md
+DEPLOYED.md
+DEPLOYMENT.md
+FINAL.md
+RELEASE.md
+pytest.ini
+pytest-release.ini
+template.yaml
+template-release.yaml
+scripts/deploy.ps1
+scripts/deploy-final.ps1
+scripts/deploy-release.ps1
+tests/
+tests_release/
+web/

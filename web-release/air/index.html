@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>湿り空気計算</title><link rel="stylesheet" href="/assets/style.css"></head>
+<body>
+  <header><div class="container"><a href="/index.html">← 計算ツール一覧</a></div></header>
+  <main class="container">
+    <h1>湿り空気計算</h1><p class="lead">既知の2項目を選び、空気の状態値を計算します。</p>
+    <div class="grid">
+      <form id="air-form" class="card">
+        <div class="field"><label for="mode">入力する項目</label><select id="mode" name="mode"><option value="ta-rh">乾球温度 ＋ 相対湿度</option><option value="ta-td">乾球温度 ＋ 露点温度</option><option value="ta-x">乾球温度 ＋ 絶対湿度</option><option value="rh-x">相対湿度 ＋ 絶対湿度</option><option value="rh-td">相対湿度 ＋ 露点温度</option></select></div>
+        <div class="field" data-field="ta"><label for="ta">乾球温度（℃）</label><input id="ta" name="ta" type="number" min="-50" max="80" step="0.1" value="25"></div>
+        <div class="field" data-field="rh"><label for="rh">相対湿度（%）</label><input id="rh" name="rh" type="number" min="0.1" max="100" step="0.1" value="50"></div>
+        <div class="field hidden" data-field="td"><label for="td">露点温度（℃）</label><input id="td" name="td" type="number" min="-80" max="80" step="0.1" value="15" disabled></div>
+        <div class="field hidden" data-field="x"><label for="x">絶対湿度（g/kg(DA)）</label><input id="x" name="x" type="number" min="0.01" max="100" step="0.01" value="10" disabled></div>
+        <details class="field"><summary>詳細設定</summary><label for="pressure">大気圧（Pa）</label><input id="pressure" name="pressure" type="number" min="60000" max="120000" step="1" value="101325"></details>
+        <button id="calculate" type="submit">計算する</button>
+      </form>
+      <section class="card result" aria-live="polite"><h2>計算結果</h2><p id="status" class="status">計算しています…</p><dl id="metrics" class="metrics" hidden><div><dt>乾球温度</dt><dd><span data-result="ta">—</span> ℃</dd></div><div><dt>相対湿度</dt><dd><span data-result="rh">—</span> %</dd></div><div><dt>露点温度</dt><dd><span data-result="td">—</span> ℃</dd></div><div><dt>絶対湿度</dt><dd><span data-result="x">—</span> g/kg(DA)</dd></div><div><dt>比エンタルピー</dt><dd><span data-result="h">—</span> kJ/kg(DA)</dd></div><div><dt>湿り空気密度</dt><dd><span data-result="rho">—</span> kg/m³</dd></div></dl></section>
+    </div>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
+
