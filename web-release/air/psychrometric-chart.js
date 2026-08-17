@@ -105,6 +105,33 @@ export function renderPsychrometricChart(svg, state, pressureKpa = 101.325) {
     return null;
   };
 
+  const clipCurveToTop = (rawPoints) => {
+    const clipped = [];
+    let previous = null;
+    for (const current of rawPoints) {
+      if (!current || !current.every(Number.isFinite)) {
+        previous = null;
+        continue;
+      }
+      if (previous) {
+        const [previousX, previousY] = previous;
+        const [currentX, currentY] = current;
+        const crossesTop = (previousY <= yMax && currentY > yMax)
+          || (previousY > yMax && currentY <= yMax);
+        if (crossesTop) {
+          const fraction = (yMax - previousY) / (currentY - previousY);
+          const intersectionX = previousX + fraction * (currentX - previousX);
+          if (intersectionX >= xMin && intersectionX <= xMax) {
+            clipped.push([intersectionX, yMax]);
+          }
+        }
+      }
+      if (visible(current[0], current[1])) clipped.push(current);
+      previous = current;
+    }
+    return clipped;
+  };
+
   svg.replaceChildren();
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
   svg.setAttribute("xmlns", SVG_NS);
@@ -136,14 +163,17 @@ export function renderPsychrometricChart(svg, state, pressureKpa = 101.325) {
   }
 
   for (const temperature of sequence(-10, 50, 2)) {
-    const points = sequence(0, 100, 2).map((rh) => {
+    const rawPoints = sequence(0, 100, 2).map((rh) => {
       const humidity = humidityRatio(temperature, rh, pressureKpa);
       const x = chartTemperature(temperature, humidity);
-      return visible(x, humidity) ? [x, humidity] : null;
+      return [x, humidity];
     });
+    const points = clipCurveToTop(rawPoints);
     addPath(grid, points, project, {
       stroke: temperature % 10 === 0 ? "#b45353" : "#f0b8b8",
       "stroke-width": temperature % 10 === 0 ? 0.9 : 0.55,
+      "data-role": "dry-bulb-line",
+      "data-temperature": temperature,
     });
   }
 
@@ -196,15 +226,18 @@ export function renderPsychrometricChart(svg, state, pressureKpa = 101.325) {
   }
 
   for (const rh of sequence(10, 100, 10)) {
-    const points = sequence(-10, 50, 0.25).map((temperature) => {
+    const rawPoints = sequence(-10, 50, 0.25).map((temperature) => {
       const humidity = humidityRatio(temperature, rh, pressureKpa);
       const x = chartTemperature(temperature, humidity);
-      return visible(x, humidity) ? [x, humidity] : null;
+      return [x, humidity];
     });
+    const points = clipCurveToTop(rawPoints);
     addPath(grid, points, project, {
       stroke: rh === 100 ? "#17212b" : "#52616f",
       "stroke-width": rh === 100 ? 1.5 : 0.9,
       "stroke-dasharray": rh === 100 ? "" : "3 2",
+      "data-role": "relative-humidity-line",
+      "data-rh": rh,
     });
     const labelTemperature = rh >= 60 ? 34 : 46;
     const labelHumidity = humidityRatio(labelTemperature, rh, pressureKpa);
