@@ -71,6 +71,9 @@ export function renderPsychrometricChart(svg, state, pressureKpa = 101.325) {
   ];
   const visible = (x, y) => Number.isFinite(x) && Number.isFinite(y)
     && x >= xMin && x <= xMax && y >= yMin && y <= yMax;
+  const enthalpyAxisSlope = (0.037 - 0.004) / (29 - (-10.3));
+  const enthalpyAxisIntercept = 0.004 - enthalpyAxisSlope * (-10.3);
+  const enthalpyAxisHumidity = (x) => enthalpyAxisSlope * x + enthalpyAxisIntercept;
 
   svg.replaceChildren();
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
@@ -119,9 +122,32 @@ export function renderPsychrometricChart(svg, state, pressureKpa = 101.325) {
       const humidity = humidityFromEnthalpy(temperature, enthalpy);
       const saturation = humidityRatio(temperature, 100, pressureKpa);
       const x = chartTemperature(temperature, humidity);
-      return humidity >= 0 && humidity <= saturation && visible(x, humidity) ? [x, humidity] : null;
+      const belowAxis = humidity <= enthalpyAxisHumidity(x);
+      return humidity >= 0 && humidity <= saturation && belowAxis && visible(x, humidity) ? [x, humidity] : null;
     });
     addPath(grid, points, project, { stroke: "#5b8fd9", "stroke-width": 0.75 });
+
+    const scalePoints = sequence(-10, 50, 0.05).map((temperature) => {
+      const humidity = humidityFromEnthalpy(temperature, enthalpy);
+      const x = chartTemperature(temperature, humidity);
+      const axisHumidity = enthalpyAxisHumidity(x);
+      return humidity >= axisHumidity && humidity <= axisHumidity + 0.0005 && visible(x, humidity)
+        ? [x, humidity]
+        : null;
+    });
+    addPath(grid, scalePoints, project, {
+      stroke: "#1d4ed8", "stroke-width": 1.1, "data-role": "enthalpy-scale",
+    });
+    const labelPoint = scalePoints.find(Boolean);
+    if (labelPoint) {
+      const [labelX, labelY] = project(labelPoint[0], labelPoint[1]);
+      grid.append(svgElement("text", {
+        x: labelX - 4, y: labelY + 3, "text-anchor": "end",
+        fill: "#1d4ed8", "font-size": 10, "font-weight": 650,
+        transform: `rotate(-40 ${labelX - 4} ${labelY + 3})`,
+        "data-role": "enthalpy-tick",
+      }, String(enthalpy)));
+    }
   }
 
   for (const rh of sequence(10, 100, 10)) {
@@ -143,6 +169,24 @@ export function renderPsychrometricChart(svg, state, pressureKpa = 101.325) {
       grid.append(svgElement("text", { x: x + 4, y: y - 3, fill: "#374151", "font-size": 10 }, `${rh}%`));
     }
   }
+
+  const [enthalpyAxisStartX, enthalpyAxisStartY] = project(-10.3, 0.004);
+  const [enthalpyAxisEndX, enthalpyAxisEndY] = project(29, 0.037);
+  grid.append(svgElement("line", {
+    x1: enthalpyAxisStartX, y1: enthalpyAxisStartY,
+    x2: enthalpyAxisEndX, y2: enthalpyAxisEndY,
+    stroke: "#17212b", "stroke-width": 1.4,
+    "data-role": "enthalpy-axis",
+  }));
+  const [enthalpyTitleX, enthalpyTitleY] = project(3, enthalpyAxisHumidity(3));
+  grid.append(svgElement("text", {
+    x: enthalpyTitleX, y: enthalpyTitleY - 8,
+    "text-anchor": "middle", fill: "#17212b",
+    "font-size": 13, "font-weight": 700,
+    transform: `rotate(-40 ${enthalpyTitleX} ${enthalpyTitleY - 8})`,
+    stroke: "#ffffff", "stroke-width": 4, "paint-order": "stroke",
+    "data-role": "enthalpy-title",
+  }, "比エンタルピー h [kJ/kg(DA)]"));
 
   const axes = svgElement("g", { fill: "#334155", "font-size": 11 });
   svg.append(axes);
