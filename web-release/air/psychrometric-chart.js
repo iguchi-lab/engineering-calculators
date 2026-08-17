@@ -88,7 +88,9 @@ export function renderPsychrometricChart(svg, state, pressureKpa = 101.325) {
       const humidity = humidityFromEnthalpy(temperature, enthalpy);
       const x = chartTemperature(temperature, humidity);
       const delta = humidity - enthalpyAxisHumidity(x);
-      if (previous && previous.delta <= 0 && delta >= 0) {
+      const crossedAxis = previous
+        && ((previous.delta <= 0 && delta >= 0) || (previous.delta >= 0 && delta <= 0));
+      if (crossedAxis) {
         const fraction = previous.delta / (previous.delta - delta);
         const intersectionTemperature = previous.temperature
           + fraction * (temperature - previous.temperature);
