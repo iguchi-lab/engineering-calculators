@@ -11,6 +11,7 @@ This repository is intended to grow into a collection of engineering calculation
 - CloudFront routes `/api/*` to an API Gateway HTTP API.
 - Separate Python Lambda functions calculate PMV/PPD and moist-air properties.
 - API requests are throttled and validated server-side.
+- The moist-air page renders an h-x psychrometric chart as browser-native SVG.
 
 The stack deploys independently, so existing calculators can remain available during acceptance testing and migration.
 
@@ -31,6 +32,9 @@ python -m pytest -c pytest-verified.ini
 ```
 
 The PMV tests include representative values captured from the legacy API. The moist-air tests cover standard conditions, reverse calculation, and invalid-input responses.
+
+The browser chart ports the equations and oblique-coordinate transform from
+[`iguchi-lab/psychrometric-chart`](https://github.com/iguchi-lab/psychrometric-chart).
 
 ## Deployment
 
