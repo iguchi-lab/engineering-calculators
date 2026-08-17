@@ -29,6 +29,12 @@ button:disabled { opacity:.55; cursor:wait; }
 .metrics dt { color:var(--muted); font-size:.9rem; }
 .metrics dd { margin:3px 0 0; font-size:1.35rem; font-weight:700; font-variant-numeric:tabular-nums; }
 .hidden { display:none; }
+.chart-card { margin-top:20px; }
+.chart-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; }
+.chart-heading .lead { margin-bottom:0; }
+.chart-heading button { flex:0 0 auto; }
+.chart-scroll { width:100%; overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:#fff; }
+.psychrometric-chart { display:block; width:100%; min-width:700px; height:auto; }
+.chart-source { margin:8px 0 0; color:var(--muted); font-size:.9rem; }
 footer { border-top:1px solid var(--line); padding:24px 0; color:var(--muted); }
-@media (max-width:620px) { main { padding-top:24px; } .card { padding:18px; } }
-
+@media (max-width:620px) { main { padding-top:24px; } .card { padding:18px; } .chart-heading { display:block; } .chart-heading button { margin-top:12px; } }
