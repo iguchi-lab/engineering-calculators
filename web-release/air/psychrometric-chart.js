@@ -148,7 +148,13 @@ export function renderPsychrometricChart(svg, state, pressureKpa = 101.325) {
   }
 
   for (const enthalpy of sequence(0, 120, 10)) {
-    const axisPoint = findEnthalpyAxisIntersection(enthalpy);
+    const calculatedAxisPoint = findEnthalpyAxisIntersection(enthalpy);
+    const axisStartTemperature = (
+      -10.3 + 0.004 * CP_V * 50 / CP_DA
+    ) / (1 + 0.004 * CP_V / CP_DA);
+    const axisPoint = calculatedAxisPoint ?? (enthalpy === 0
+      ? { temperature: axisStartTemperature, x: -10.3, humidity: 0.004 }
+      : null);
     const points = axisPoint ? [[axisPoint.x, axisPoint.humidity]] : [];
     const startTemperature = axisPoint ? axisPoint.temperature + 0.05 : -10;
     for (const temperature of sequence(startTemperature, 50, 0.1)) {
@@ -166,7 +172,7 @@ export function renderPsychrometricChart(svg, state, pressureKpa = 101.325) {
       "data-axis-hit": String(Boolean(axisPoint)),
     });
 
-    if (axisPoint) {
+    if (axisPoint && enthalpy > 0) {
       const [tickX, tickY] = project(axisPoint.x, axisPoint.humidity);
       const tickHalfLength = 4;
       grid.append(svgElement("line", {
