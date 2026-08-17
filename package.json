@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:chart": "node --test tests_verified/psychrometric-chart.test.js"
+    "test:chart": "node --test tests_verified/*.test.js"
   }
 }
