@@ -17,8 +17,16 @@
       </form>
       <section class="card result" aria-live="polite"><h2>計算結果</h2><p id="status" class="status">計算しています…</p><dl id="metrics" class="metrics" hidden><div><dt>乾球温度</dt><dd><span data-result="ta">—</span> ℃</dd></div><div><dt>相対湿度</dt><dd><span data-result="rh">—</span> %</dd></div><div><dt>露点温度</dt><dd><span data-result="td">—</span> ℃</dd></div><div><dt>絶対湿度</dt><dd><span data-result="x">—</span> g/kg(DA)</dd></div><div><dt>比エンタルピー</dt><dd><span data-result="h">—</span> kJ/kg(DA)</dd></div><div><dt>湿り空気密度</dt><dd><span data-result="rho">—</span> kg/m³</dd></div></dl></section>
     </div>
+    <section class="card chart-card">
+      <div class="chart-heading">
+        <div><h2>湿り空気線図</h2><p class="lead">入力した気圧でh-x線図を描き、計算結果を状態点として表示します。</p></div>
+        <button id="download-chart" type="button" disabled>SVGを保存</button>
+      </div>
+      <div class="chart-scroll"><svg id="psychrometric-chart" class="psychrometric-chart" role="img" aria-labelledby="chart-title chart-description"></svg></div>
+      <p id="chart-status" class="status" aria-live="polite">計算後に状態点を表示します。</p>
+      <p class="chart-source">描画ロジック: <a href="https://github.com/iguchi-lab/psychrometric-chart" target="_blank" rel="noopener noreferrer">iguchi-lab/psychrometric-chart</a> の計算式をブラウザ用SVGへ移植。</p>
+    </section>
   </main>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
-
