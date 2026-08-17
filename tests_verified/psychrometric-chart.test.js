@@ -35,6 +35,12 @@ globalThis.document = {
   },
 };
 
+function findNodes(node, predicate, matches = []) {
+  if (predicate(node)) matches.push(node);
+  for (const child of node.children) findNodes(child, predicate, matches);
+  return matches;
+}
+
 test("Tetens saturation pressure matches the Python source equation", () => {
   assert.ok(Math.abs(saturationPressure(25) - 3.1678) < 0.001);
 });
@@ -64,4 +70,7 @@ test("chart renders SVG paths and the calculated state marker", () => {
   assert.equal(svg.attributes.viewBox, "0 0 960 640");
   assert.ok(svg.children.length > 5);
   assert.ok(svg.children.some((child) => child.name === "g"));
+  assert.equal(findNodes(svg, (node) => node.attributes["data-role"] === "enthalpy-axis").length, 1);
+  assert.equal(findNodes(svg, (node) => node.attributes["data-role"] === "enthalpy-title")[0].textContent, "比エンタルピー h [kJ/kg(DA)]");
+  assert.ok(findNodes(svg, (node) => node.attributes["data-role"] === "enthalpy-tick").length >= 10);
 });
