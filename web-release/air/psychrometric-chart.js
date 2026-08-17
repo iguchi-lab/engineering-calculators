@@ -74,6 +74,36 @@ export function renderPsychrometricChart(svg, state, pressureKpa = 101.325) {
   const enthalpyAxisSlope = (0.037 - 0.004) / (29 - (-10.3));
   const enthalpyAxisIntercept = 0.004 - enthalpyAxisSlope * (-10.3);
   const enthalpyAxisHumidity = (x) => enthalpyAxisSlope * x + enthalpyAxisIntercept;
+  const [enthalpyAxisStartX, enthalpyAxisStartY] = project(-10.3, 0.004);
+  const [enthalpyAxisEndX, enthalpyAxisEndY] = project(29, 0.037);
+  const enthalpyAxisDx = enthalpyAxisEndX - enthalpyAxisStartX;
+  const enthalpyAxisDy = enthalpyAxisEndY - enthalpyAxisStartY;
+  const enthalpyAxisLength = Math.hypot(enthalpyAxisDx, enthalpyAxisDy);
+  const enthalpyAxisAngle = Math.atan2(enthalpyAxisDy, enthalpyAxisDx) * 180 / Math.PI;
+  const enthalpyAxisNormalX = -enthalpyAxisDy / enthalpyAxisLength;
+  const enthalpyAxisNormalY = enthalpyAxisDx / enthalpyAxisLength;
+  const findEnthalpyAxisIntersection = (enthalpy) => {
+    let previous = null;
+    for (const temperature of sequence(-20, 60, 0.05)) {
+      const humidity = humidityFromEnthalpy(temperature, enthalpy);
+      const x = chartTemperature(temperature, humidity);
+      const delta = humidity - enthalpyAxisHumidity(x);
+      const crossedAxis = previous
+        && ((previous.delta <= 0 && delta >= 0) || (previous.delta >= 0 && delta <= 0));
+      if (crossedAxis) {
+        const fraction = previous.delta / (previous.delta - delta);
+        const intersectionTemperature = previous.temperature
+          + fraction * (temperature - previous.temperature);
+        const intersectionHumidity = humidityFromEnthalpy(intersectionTemperature, enthalpy);
+        const intersectionX = chartTemperature(intersectionTemperature, intersectionHumidity);
+        return visible(intersectionX, intersectionHumidity)
+          ? { temperature: intersectionTemperature, x: intersectionX, humidity: intersectionHumidity }
+          : null;
+      }
+      previous = { temperature, delta };
+    }
+    return null;
+  };
 
   svg.replaceChildren();
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
@@ -118,33 +148,48 @@ export function renderPsychrometricChart(svg, state, pressureKpa = 101.325) {
   }
 
   for (const enthalpy of sequence(0, 120, 10)) {
-    const points = sequence(-10, 50, 0.25).map((temperature) => {
+    const calculatedAxisPoint = findEnthalpyAxisIntersection(enthalpy);
+    const axisStartTemperature = (
+      -10.3 + 0.004 * CP_V * 50 / CP_DA
+    ) / (1 + 0.004 * CP_V / CP_DA);
+    const axisPoint = calculatedAxisPoint ?? (enthalpy === 0
+      ? { temperature: axisStartTemperature, x: -10.3, humidity: 0.004 }
+      : null);
+    const points = axisPoint ? [[axisPoint.x, axisPoint.humidity]] : [];
+    const startTemperature = axisPoint ? axisPoint.temperature + 0.05 : -10;
+    for (const temperature of sequence(startTemperature, 50, 0.1)) {
       const humidity = humidityFromEnthalpy(temperature, enthalpy);
-      const saturation = humidityRatio(temperature, 100, pressureKpa);
       const x = chartTemperature(temperature, humidity);
-      const belowAxis = humidity <= enthalpyAxisHumidity(x);
-      return humidity >= 0 && humidity <= saturation && belowAxis && visible(x, humidity) ? [x, humidity] : null;
+      const reachesInsideChart = humidity >= 0
+        && humidity <= enthalpyAxisHumidity(x)
+        && visible(x, humidity);
+      if (reachesInsideChart) points.push([x, humidity]);
+    }
+    addPath(grid, points, project, {
+      stroke: "#5b8fd9", "stroke-width": 0.85,
+      "data-role": "enthalpy-line",
+      "data-enthalpy": enthalpy,
+      "data-axis-hit": String(Boolean(axisPoint)),
     });
-    addPath(grid, points, project, { stroke: "#5b8fd9", "stroke-width": 0.75 });
 
-    const scalePoints = sequence(-10, 50, 0.05).map((temperature) => {
-      const humidity = humidityFromEnthalpy(temperature, enthalpy);
-      const x = chartTemperature(temperature, humidity);
-      const axisHumidity = enthalpyAxisHumidity(x);
-      return humidity >= axisHumidity && humidity <= axisHumidity + 0.0005 && visible(x, humidity)
-        ? [x, humidity]
-        : null;
-    });
-    addPath(grid, scalePoints, project, {
-      stroke: "#1d4ed8", "stroke-width": 1.1, "data-role": "enthalpy-scale",
-    });
-    const labelPoint = scalePoints.find(Boolean);
-    if (labelPoint) {
-      const [labelX, labelY] = project(labelPoint[0], labelPoint[1]);
+    if (axisPoint && enthalpy > 0) {
+      const [tickX, tickY] = project(axisPoint.x, axisPoint.humidity);
+      const tickHalfLength = 4;
+      grid.append(svgElement("line", {
+        x1: tickX - enthalpyAxisNormalX * tickHalfLength,
+        y1: tickY - enthalpyAxisNormalY * tickHalfLength,
+        x2: tickX + enthalpyAxisNormalX * tickHalfLength,
+        y2: tickY + enthalpyAxisNormalY * tickHalfLength,
+        stroke: "#1d4ed8", "stroke-width": 1,
+        "data-role": "enthalpy-scale",
+      }));
+      const labelOffset = 11;
+      const labelX = tickX - enthalpyAxisNormalX * labelOffset;
+      const labelY = tickY - enthalpyAxisNormalY * labelOffset;
       grid.append(svgElement("text", {
-        x: labelX - 4, y: labelY + 3, "text-anchor": "end",
+        x: labelX, y: labelY + 3, "text-anchor": "middle",
         fill: "#1d4ed8", "font-size": 10, "font-weight": 650,
-        transform: `rotate(-40 ${labelX - 4} ${labelY + 3})`,
+        transform: `rotate(${enthalpyAxisAngle} ${labelX} ${labelY + 3})`,
         "data-role": "enthalpy-tick",
       }, String(enthalpy)));
     }
@@ -170,22 +215,24 @@ export function renderPsychrometricChart(svg, state, pressureKpa = 101.325) {
     }
   }
 
-  const [enthalpyAxisStartX, enthalpyAxisStartY] = project(-10.3, 0.004);
-  const [enthalpyAxisEndX, enthalpyAxisEndY] = project(29, 0.037);
   grid.append(svgElement("line", {
     x1: enthalpyAxisStartX, y1: enthalpyAxisStartY,
     x2: enthalpyAxisEndX, y2: enthalpyAxisEndY,
     stroke: "#17212b", "stroke-width": 1.4,
     "data-role": "enthalpy-axis",
   }));
-  const [enthalpyTitleX, enthalpyTitleY] = project(3, enthalpyAxisHumidity(3));
+  const [enthalpyTitleBaseX, enthalpyTitleBaseY] = project(3, enthalpyAxisHumidity(3));
+  const enthalpyTitleOffset = 24;
+  const enthalpyTitleX = enthalpyTitleBaseX + enthalpyAxisNormalX * enthalpyTitleOffset;
+  const enthalpyTitleY = enthalpyTitleBaseY + enthalpyAxisNormalY * enthalpyTitleOffset;
   grid.append(svgElement("text", {
-    x: enthalpyTitleX, y: enthalpyTitleY - 8,
+    x: enthalpyTitleX, y: enthalpyTitleY,
     "text-anchor": "middle", fill: "#17212b",
     "font-size": 13, "font-weight": 700,
-    transform: `rotate(-40 ${enthalpyTitleX} ${enthalpyTitleY - 8})`,
+    transform: `rotate(${enthalpyAxisAngle} ${enthalpyTitleX} ${enthalpyTitleY})`,
     stroke: "#ffffff", "stroke-width": 4, "paint-order": "stroke",
     "data-role": "enthalpy-title",
+    "data-axis-offset": enthalpyTitleOffset,
   }, "比エンタルピー h [kJ/kg(DA)]"));
 
   const axes = svgElement("g", { fill: "#334155", "font-size": 11 });
