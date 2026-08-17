@@ -78,5 +78,9 @@ test("chart renders SVG paths and the calculated state marker", () => {
   assert.equal(enthalpyLines.length, 13);
   assert.ok(enthalpyLines.every((node) => node.attributes["data-axis-hit"] === "true"));
   assert.ok(enthalpyLines.every((node) => node.attributes.d.startsWith("M")));
-  assert.equal(findNodes(svg, (node) => node.attributes["data-role"] === "enthalpy-tick").length, 13);
+  const enthalpyTicks = findNodes(svg, (node) => node.attributes["data-role"] === "enthalpy-tick");
+  assert.equal(enthalpyTicks.length, 12);
+  assert.deepEqual(enthalpyTicks.map((node) => node.textContent), [
+    "10", "20", "30", "40", "50", "60", "70", "80", "90", "100", "110", "120",
+  ]);
 });
